@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./d3.v7.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- 柱状图 -->
+    <svg width="900" height="600"></svg>
+
+    <script>
+      var dataset = [10, 20, 30, 23, 13, 40, 27, 35, 20]
+      var config = {
+        margin: { top: 20, right: 20, bottom: 20, left: 40 },
+      }
+
+      var svg = d3.select('svg')
+      var width = svg.attr('width')
+      var height = svg.attr('height')
+      var bottom = height - config.margin.top - config.margin.bottom
+      var right = width - config.margin.left - config.margin.right
+      var g = svg
+        .append('g')
+        .attr(
+          'transform',
+          `translate(${config.margin.left}, ${config.margin.top})`,
+        )
+
+      var xScale = d3
+        .scaleBand()
+        .domain(d3.range(dataset.length))
+        .rangeRound([0, right])
+      // 坐标中，刻度所在的方向向下
+      var xAxis = d3.axisBottom(xScale)
+
+      var yScale = d3
+        .scaleLinear()
+        .domain([0, d3.max(dataset)])
+        // 让刻度从下往上排
+        .range([bottom, 0])
+      // 坐标中，刻度所在的方向向左
+      var yAxis = d3.axisLeft(yScale)
+
+      g.append('g').attr('transform', `translate(0, ${bottom})`).call(xAxis)
+      g.append('g').attr('transform', `translate(0, 0)`).call(yAxis)
+
+      var gs = g.selectAll('.rect').data(dataset).enter().append('g')
+      var rectWidth = 40
+
+      gs.append('rect')
+        .attr('fill', '#F5C18C')
+        .on('mouseover', function () {
+          var rect = d3
+            .select(this)
+            .transition()
+            .duration(100)
+            .attr('fill', '#E09695')
+        })
+        .on('mouseout', function () {
+          var rect = d3
+            .select(this)
+            .transition()
+            .duration(100)
+            .attr('fill', '#F5C18C')
+        })
+        .attr('x', (d, i) => xScale(i) + (xScale.step() - rectWidth) / 2)
+        .attr('y', bottom)
+        .attr('height', 0)
+        .attr('width', () => rectWidth)
+        .transition()
+        .duration(1000)
+        // .ease(d3.easeElasticOut)
+        .attr('y', (d, i) => yScale(d))
+        .attr('height', (d) => bottom - yScale(d))
+
+      gs.append('text')
+        .text((d) => d)
+        .attr('x', (d, i) => xScale(i) + (xScale.step() - rectWidth) / 2)
+        .attr('y', bottom)
+        .attr('dx', (d, i) => rectWidth / 4)
+        .attr('dy', 20)
+        .transition()
+        .duration(1000)
+        // .ease(d3.easeElasticOut)
+        .attr('y', (d) => yScale(d))
+    </script>
+  </body>
+</html>
